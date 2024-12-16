@@ -326,18 +326,18 @@
 
         {% if items %}
         <div class="header no-print">
-            <button onclick="window.print()" class="print-button">Print QR Codes</button>
+            <button onclick="downloadAllQRCodes()" class="print-button">Download All QR Codes</button>
         </div>
         
         <div class="items-grid">
             {% for item in items %}
             <div class="item-card">
                 <div class="item-info">
-                    <p><strong>Item Number (Id):</strong> {{ item['Id'] }}</p>
+                    <p>{{ item['Name'] }}</p>
                 </div>
                 <div class="qr-code">
                     <img id="qr-{{ loop.index }}" src="data:image/png;base64,{{ item['qr_code'] }}" alt="QR Code">
-                    <button class="download-button" onclick="downloadQR('qr-{{ loop.index }}', 'QR_Code_{{ item['Id'] }}.png')">Download</button>
+                    <button class="download-button" onclick="downloadQR('qr-{{ loop.index }}', 'QR_Code_{{ item['Name'] }}.png')">Download</button>
                 </div>
             </div>
             {% endfor %}
@@ -346,6 +346,29 @@
     </div>
 
     <script>
+        function downloadAllQRCodes() {
+        const items = document.querySelectorAll('.item-card');
+        items.forEach((item) => {
+            const img = item.querySelector('img');
+            const filename = `QR_Code_${item.querySelector('.item-info p').textContent}.png`;
+            
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            const image = new Image();
+
+            image.onload = function () {
+                canvas.width = image.width;
+                canvas.height = image.height;
+                context.drawImage(image, 0, 0);
+
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = filename;
+                link.click();
+            };
+            image.src = img.src;
+        });
+    }
         function downloadQR(imgId, filename) {
             const img = document.getElementById(imgId);
             const canvas = document.createElement('canvas');
